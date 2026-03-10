@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  systemlog:
+    build: .
+    container_name: systemlog-app
+    ports:
+      - "5757:5757"
+    volumes:
+      # Persist log files on host system
+      - ./logs:/app/logs
+      # Mount access.log to host for easy access
+      - ./access.log:/app/access.log
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5757/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Optional: Add logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    # Create logs directory if it doesn't exist
+    depends_on:
+      - log-init
+      
+  # Helper service to create logs directory
+  log-init:
+    image: alpine:latest
+    container_name: systemlog-init
+    command: ["sh", "-c", "mkdir -p /host-logs && chown 1000:1000 /host-logs"]
+    volumes:
+      - ./logs:/host-logs
+    restart: "no"
+
+volumes:
+  logs:
+    driver: local
