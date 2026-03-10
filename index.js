@@ -9,7 +9,8 @@ app.get("/health", (req, res) => {
   res.status(200).send("OK");
 });
 
-app.all("*", (req, res) => {
+// Catch all other routes
+app.use((req, res) => {
   const log = {
     time: new Date().toISOString(),
     ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
