@@ -6,6 +6,11 @@ const PORT = 5757;
 
 // Health check endpoint for Docker
 app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
+// Catch all other routes for logging
+app.use((req, res) => {
   const log = {
     time: new Date().toISOString(),
     ip: req.headers["x-forwarded-for"] || req.socket.remoteAddress,
@@ -20,7 +25,6 @@ app.get("/health", (req, res) => {
 
   res.send("Request logged");
 });
-
 
 app.listen(PORT, () => {
   console.log(`Logger running on port ${PORT}`);
